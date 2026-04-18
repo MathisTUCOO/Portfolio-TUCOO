@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Productions – Mathis TUCOO</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .prod-card {
+      background: var(--card-bg); border: 1px solid var(--glass-border);
+      border-radius: 14px; padding: 1.5rem; transition: all 0.3s;
+      display: flex; flex-direction: column; gap: 0.8rem;
+    }
+    .prod-card:hover {
+      border-color: rgba(0,229,255,0.35); transform: translateY(-4px);
+      box-shadow: 0 12px 35px rgba(0,194,255,0.12);
+    }
+    .prod-card-top { display: flex; align-items: flex-start; gap: 1rem; }
+    .prod-icon {
+      font-size: 2rem; width: 52px; height: 52px; flex-shrink: 0;
+      background: rgba(0,194,255,0.08); border: 1px solid var(--glass-border);
+      border-radius: 10px; display: flex; align-items: center; justify-content: center;
+    }
+    .prod-card h3 {
+      font-family: 'Orbitron', monospace; font-size: 0.9rem;
+      color: var(--blue-bright); margin-bottom: 0.3rem;
+    }
+    .prod-card p { color: var(--text-dim); font-size: 0.82rem; line-height: 1.5; }
+    .prod-tech { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+    .prod-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      border-top: 1px solid rgba(0,194,255,0.08); padding-top: 0.8rem;
+      margin-top: 0.3rem;
+    }
+    .prod-date { font-family: 'Share Tech Mono', monospace; font-size: 0.72rem; color: var(--text-dim); }
+    .prod-link {
+      font-size: 0.75rem; color: var(--accent); text-decoration: none;
+      font-family: 'Share Tech Mono', monospace;
+    }
+    .prod-link:hover { text-shadow: 0 0 8px var(--accent); }
+    .cat-label {
+      font-family: 'Orbitron', monospace; font-size: 1.1rem; color: var(--text-dim);
+      margin: 2rem 0 1rem; padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--glass-border);
+      display: flex; align-items: center; gap: 0.6rem;
+    }
+  </style>
+</head>
+<body>
+<script src="nav.js"></script>
+<main>
+  <div class="page-header">
+    <h1>Mes Productions</h1>
+    <div class="divider"></div>
+    <p class="subtitle">Projets, scripts, configurations &amp; réalisations techniques</p>
+  </div>
+  <div class="container">
+
+    <!-- CATÉGORIE SCRIPTS & AUTOMATISATION -->
+    <div class="cat-label">⚙️ Scripts &amp; Automatisation</div>
+    <div class="grid-auto">
+      <div class="prod-card anim-in">
+        <div class="prod-card-top">
+          <div class="prod-icon">🔄</div>
+          <div>
+            <h3>Automatisations n8n – OGFA</h3>
+            <p>Flux automatisés d'alertes et de notifications internes. Intégration avec messagerie et GLPI.</p>
+          </div>
+        </div>
+        <div class="prod-tech">
+          <span class="tag">n8n</span><span class="tag">API REST</span><span class="tag">JSON</span><span class="tag">GLPI</span>
+        </div>
+        <div class="prod-footer">
+          <span class="prod-date">Stage OGFA – 2025</span>
+        </div>
+      </div>
+
+      <div class="prod-card anim-in" style="animation-delay:0.05s;">
+        <div class="prod-card-top">
+          <div class="prod-icon">📜</div>
+          <div>
+            <h3>Scripts d'administration</h3>
+            <p>Scripts Bash/PowerShell pour automatiser des tâches système récurrentes (inventaire, sauvegarde, logs).</p>
+          </div>
+        </div>
+        <div class="prod-tech">
+          <span class="tag">Bash</span><span class="tag">PowerShell</span><span class="tag">Linux</span><span class="tag">Windows</span>
+        </div>
+        <div class="prod-footer">
+          <span class="prod-date">BTS SIO – 2024/2026</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CATÉGORIE RÉSEAUX & SYSTÈMES -->
+    <div class="cat-label">🌐 Réseaux &amp; Systèmes</div>
+    <div class="grid-auto">
+      <div class="prod-card anim-in" style="animation-delay:0.1s;">
+        <div class="prod-card-top">
+          <div class="prod-icon">📦</div>
+          <div>
+            <h3>Déploiement GLPI + MDM</h3>
+            <p>Mise en place de GLPI pour la gestion de parc et Headwind MDM pour la gestion des mobiles Android.</p>
+          </div>
+        </div>
+        <div class="prod-tech">
+          <span class="tag">GLPI</span><span class="tag">Headwind MDM</span><span class="tag">Linux</span><span class="tag">MariaDB</span>
+        </div>
+        <div class="prod-footer">
+          <span class="prod-date">Stage OGFA – 2025</span>
+        </div>
+      </div>
+
+      <div class="prod-card anim-in" style="animation-delay:0.15s;">
+        <div class="prod-card-top">
+          <div class="prod-icon">🖥️</div>
+          <div>
+            <h3>Déploiement Windows 10 – UPPA</h3>
+            <p>Déploiement en masse de postes Windows 10 avec intégration au domaine Active Directory.</p>
+          </div>
+        </div>
+        <div class="prod-tech">
+          <span class="tag">Windows 10</span><span class="tag">Active Directory</span><span class="tag">WDS</span>
+        </div>
+        <div class="prod-footer">
+          <span class="prod-date">Stage UPPA – 2023</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CATÉGORIE WEB -->
+    <div class="cat-label">🌍 Web</div>
+    <div class="grid-auto">
+      <div class="prod-card anim-in" style="animation-delay:0.2s;">
+        <div class="prod-card-top">
+          <div class="prod-icon">💼</div>
+          <div>
+            <h3>Portfolio professionnel (v1 &amp; v2)</h3>
+            <p>Site web portfolio présentant mon parcours BTS SIO. Version 1 sur Weebly, version 2 en HTML/CSS/JS pur.</p>
+          </div>
+        </div>
+        <div class="prod-tech">
+          <span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">JavaScript</span>
+        </div>
+        <div class="prod-footer">
+          <span class="prod-date">2024–2026</span>
+          <a href="https://portfoliotucoo.weebly.com/" class="prod-link" target="_blank">→ Version 1</a>
+        </div>
+      </div>
+
+      <div class="prod-card anim-in" style="animation-delay:0.25s;">
+        <div class="prod-card-top">
+          <div class="prod-icon">🔐</div>
+          <div>
+            <h3>Site PHP/PDO sécurisé</h3>
+            <p>Application web avec authentification, gestion des sessions, protection CSRF, requêtes préparées PDO.</p>
+          </div>
+        </div>
+        <div class="prod-tech">
+          <span class="tag">PHP</span><span class="tag">PDO</span><span class="tag">SQL</span><span class="tag">HTML/CSS</span>
+        </div>
+        <div class="prod-footer">
+          <span class="prod-date">BTS SIO – 2025</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+</body>
+</html>

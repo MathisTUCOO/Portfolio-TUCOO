@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ateliers Professionnels – Mathis TUCOO</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .atelier-empty {
+      text-align: center; padding: 5rem 2rem;
+      background: var(--card-bg); border: 1px dashed var(--glass-border);
+      border-radius: 16px;
+    }
+    .atelier-empty .icon { font-size: 4rem; margin-bottom: 1.5rem; }
+    .atelier-empty h2 {
+      font-family: 'Orbitron', monospace; color: var(--text-dim);
+      font-size: 1.2rem; margin-bottom: 1rem;
+    }
+    .atelier-empty p { color: var(--text-dim); font-size: 0.9rem; line-height: 1.7; max-width: 500px; margin: 0 auto; }
+    .atelier-placeholder {
+      background: var(--card-bg); border: 1px solid var(--glass-border);
+      border-radius: 12px; padding: 1.5rem; opacity: 0.5;
+    }
+    .atelier-placeholder h3 { font-family: 'Orbitron', monospace; color: var(--text-dim); font-size: 0.9rem; margin-bottom: 0.5rem; }
+    .atelier-placeholder p { color: var(--text-dim); font-size: 0.8rem; }
+    .info-banner {
+      background: rgba(13,110,253,0.1); border: 1px solid rgba(13,110,253,0.3);
+      border-radius: 10px; padding: 1rem 1.5rem; margin-bottom: 2rem;
+      display: flex; align-items: center; gap: 1rem; font-size: 0.88rem;
+      color: var(--text-main);
+    }
+  </style>
+</head>
+<body>
+<script src="nav.js"></script>
+<main>
+  <div class="page-header">
+    <h1>Ateliers Professionnels</h1>
+    <div class="divider"></div>
+    <p class="subtitle">Travaux pratiques réalisés en formation BTS SIO SISR</p>
+  </div>
+  <div class="container">
+
+    <div class="info-banner">
+      <span style="font-size:1.3rem;">ℹ️</span>
+      <span>Cette section regroupe l'ensemble des ateliers professionnels réalisés en cours de BTS SIO SISR. 
+      Les contenus seront ajoutés au fil de l'avancement de la formation.</span>
+    </div>
+
+    <div class="atelier-empty anim-in">
+      <div class="icon">🔧</div>
+      <h2>Section en construction</h2>
+      <p>
+        Les ateliers professionnels seront documentés ici progressivement. 
+        Chaque atelier présentera le contexte, les objectifs, les technologies utilisées 
+        et les compétences du référentiel BTS SIO mobilisées.
+      </p>
+    </div>
+
+    <!-- Exemples de placeholders d'ateliers à venir -->
+    <div class="grid-2" style="margin-top:2rem; gap:1.2rem;">
+      <div class="atelier-placeholder">
+        <h3>🌐 Atelier Réseau – VLAN & Routage</h3>
+        <p>Configuration de VLANs, routage inter-VLAN, pare-feu basique.</p>
+      </div>
+      <div class="atelier-placeholder">
+        <h3>🖥️ Atelier Systèmes – Debian Server</h3>
+        <p>Installation, configuration Apache/Nginx, MariaDB, SSH sécurisé.</p>
+      </div>
+      <div class="atelier-placeholder">
+        <h3>🔒 Atelier Sécurité – Durcissement</h3>
+        <p>Audit de sécurité, application des recommandations ANSSI.</p>
+      </div>
+      <div class="atelier-placeholder">
+        <h3>📦 Atelier GLPI – Gestion de parc</h3>
+        <p>Déploiement GLPI, inventaire, tickets, fusionInventory.</p>
+      </div>
+    </div>
+
+  </div>
+</main>
+</body>
+</html>
