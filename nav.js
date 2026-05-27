@@ -7,11 +7,19 @@ const pages = [
   { href: 'stages.html',      label: 'Stages' },
   { href: 'veille.html',      label: 'Veille' },
   { href: 'competences.html', label: 'Compétences' },
-  { href: 'productions.html', label: 'Productions' },
 ];
 
 function buildNav() {
   const current = location.pathname.split('/').pop() || 'index.html';
+
+  // ── Curseur custom ───────────────────────────────────────────────────
+  const cursorCSS = document.createElement('link');
+  cursorCSS.rel = 'stylesheet'; cursorCSS.href = 'cursor.css';
+  document.head.appendChild(cursorCSS);
+
+  const cursorJS = document.createElement('script');
+  cursorJS.src = 'cursor.js';
+  document.head.appendChild(cursorJS);
 
   // ── Navbar ──────────────────────────────────────────────────────────
   const nav = document.createElement('nav');
@@ -42,6 +50,56 @@ function buildNav() {
   canvas.id = 'particles-canvas';
   document.body.prepend(canvas);
   initParticles(canvas);
+
+  // ── Lightbox ────────────────────────────────────────────────────────
+  const lb = document.createElement('div');
+  lb.id = 'lightbox-overlay';
+  lb.innerHTML = `
+    <img id="lightbox-img" src="" alt="">
+    <button id="lightbox-close">✕</button>
+    <div id="lightbox-caption"></div>
+  `;
+  document.body.appendChild(lb);
+
+  const lbImg     = document.getElementById('lightbox-img');
+  const lbClose   = document.getElementById('lightbox-close');
+  const lbCaption = document.getElementById('lightbox-caption');
+
+  function openLightbox(src, caption) {
+    lbImg.src = src;
+    lbCaption.textContent = caption || '';
+    lbCaption.style.display = caption ? 'block' : 'none';
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLightbox() {
+    lb.classList.remove('open');
+    document.body.style.overflow = '';
+    setTimeout(() => { lbImg.src = ''; }, 350);
+  }
+
+  lbClose.onclick = closeLightbox;
+  lb.addEventListener('click', e => { if (e.target === lb || e.target === lbImg) closeLightbox(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+  // Rend toutes les images zoomables (sauf logos et curseur)
+  function initZoomable() {
+    const exclude = '#cursor-canvas, .nav-card-icon, .stage-logo-wrap img, #modal-logo-img, .gallery-logo-item img, .et-glpi, .et-mdm, .et-n8n, .ap-tab-icon';
+    document.querySelectorAll('img').forEach(img => {
+      if (img.closest(exclude) || img.classList.contains('no-zoom')) return;
+      if (img.classList.contains('zoomable')) return;
+      img.classList.add('zoomable');
+      img.addEventListener('click', () => {
+        const cap = img.alt || img.closest('.schema-box')?.nextElementSibling?.textContent || '';
+        openLightbox(img.src, cap);
+      });
+    });
+  }
+
+  // Lance une première fois + surveille les changements DOM (images chargées dynamiquement)
+  setTimeout(initZoomable, 500);
+  const zoomObs = new MutationObserver(() => initZoomable());
+  zoomObs.observe(document.body, { childList: true, subtree: true });
 
   // ── Footer ──────────────────────────────────────────────────────────
   const footer = document.createElement('footer');

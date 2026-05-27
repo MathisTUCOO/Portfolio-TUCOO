@@ -6,78 +6,608 @@
   <title>Ateliers Professionnels – Mathis TUCOO</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    .atelier-empty {
-      text-align: center; padding: 5rem 2rem;
-      background: var(--card-bg); border: 1px dashed var(--glass-border);
-      border-radius: 16px;
-    }
-    .atelier-empty .icon { font-size: 4rem; margin-bottom: 1.5rem; }
-    .atelier-empty h2 {
-      font-family: 'Orbitron', monospace; color: var(--text-dim);
-      font-size: 1.2rem; margin-bottom: 1rem;
-    }
-    .atelier-empty p { color: var(--text-dim); font-size: 0.9rem; line-height: 1.7; max-width: 500px; margin: 0 auto; }
-    .atelier-placeholder {
+    .ap-root { position: relative; min-height: 70vh; }
+    .ap-grid { display: flex; gap: 1.5rem; align-items: flex-start; }
+    .ap-card-outer { width: calc(50% - 0.6rem); transition: width 0.6s cubic-bezier(0.77,0,0.175,1); }
+    .ap-card-closed {
       background: var(--card-bg); border: 1px solid var(--glass-border);
-      border-radius: 12px; padding: 1.5rem; opacity: 0.5;
+      border-radius: 14px; padding: 1.8rem; cursor: pointer;
+      transition: all 0.3s ease; position: relative; overflow: hidden;
+      display: flex; flex-direction: column; gap: 0.8rem;
     }
-    .atelier-placeholder h3 { font-family: 'Orbitron', monospace; color: var(--text-dim); font-size: 0.9rem; margin-bottom: 0.5rem; }
-    .atelier-placeholder p { color: var(--text-dim); font-size: 0.8rem; }
-    .info-banner {
-      background: rgba(13,110,253,0.1); border: 1px solid rgba(13,110,253,0.3);
-      border-radius: 10px; padding: 1rem 1.5rem; margin-bottom: 2rem;
-      display: flex; align-items: center; gap: 1rem; font-size: 0.88rem;
-      color: var(--text-main);
+    .ap-card-closed::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(13,110,253,0.08), transparent);
+      opacity: 0; transition: opacity 0.3s;
     }
+    .ap-card-closed:hover { border-color: rgba(0,229,255,0.4); transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,194,255,0.14); }
+    .ap-card-closed:hover::before { opacity: 1; }
+    .acc-icon { font-size: 2.5rem; width: 64px; height: 64px; background: rgba(0,194,255,0.08); border: 1px solid var(--glass-border); border-radius: 14px; display: flex; align-items: center; justify-content: center; }
+    .acc-title { font-family: 'Orbitron', monospace; font-size: 0.95rem; color: var(--accent); margin-bottom: 0.2rem; }
+    .acc-meta { font-family: 'Share Tech Mono', monospace; font-size: 0.68rem; color: var(--text-dim); }
+    .acc-desc { font-size: 0.82rem; color: var(--text-dim); line-height: 1.5; }
+    .acc-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.3rem; }
+    .acc-open-hint { font-family: 'Share Tech Mono', monospace; font-size: 0.68rem; color: var(--accent); margin-top: auto; padding-top: 0.5rem; border-top: 1px solid rgba(0,194,255,0.1); display: flex; align-items: center; gap: 0.4rem; opacity: 0; transition: opacity 0.3s; }
+    .ap-card-closed:hover .acc-open-hint { opacity: 1; }
+    .ap-root.has-open .ap-sidebar-col { width: 240px; gap: 0.5rem; }
+    .ap-root.has-open .ap-card-outer { width: 100%; }
+    .ap-root.has-open .ap-card-closed { padding: 0.75rem 1rem; flex-direction: row; align-items: center; gap: 0.8rem; }
+    .ap-root.has-open .ap-card-closed .acc-icon { width: 36px; height: 36px; font-size: 1.2rem; flex-shrink: 0; border-radius: 8px; }
+    .ap-root.has-open .ap-card-closed .acc-title { font-size: 0.72rem; margin-bottom: 0.1rem; }
+    .ap-root.has-open .ap-card-closed .acc-meta { font-size: 0.6rem; }
+    .ap-root.has-open .ap-card-closed .acc-desc,
+    .ap-root.has-open .ap-card-closed .acc-tags,
+    .ap-root.has-open .ap-card-closed .acc-open-hint { display: none; }
+    .ap-root.has-open .ap-card-closed:hover { transform: translateX(3px); }
+    .ap-sidebar-col { display: flex; flex-wrap: wrap; gap: 1.2rem; width: 100%; flex-shrink: 0; align-content: flex-start; transition: width 0.6s cubic-bezier(0.77,0,0.175,1), gap 0.4s ease; position: sticky; top: calc(var(--nav-height) + 1.5rem); }
+    .ap-root.has-open .ap-card-closed.is-active { border-left: 3px solid var(--accent); background: rgba(0,229,255,0.07); }
+    .ap-root.is-closing .ap-card-closed { opacity: 0; transition: opacity 0.15s ease; }
+    .ap-panel-wrap { flex: 1; min-width: 0; opacity: 0; pointer-events: none; transform: translateX(-14px) scale(0.98); transition: opacity 0.28s ease, transform 0.3s ease; }
+    .ap-root.has-open .ap-panel-wrap { opacity: 1; pointer-events: auto; transform: translateX(0) scale(1); transition: opacity 0.5s ease 0.2s, transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94) 0.2s; }
+    .ap-panel-wrap.switching { transition: opacity 0.18s ease, transform 0.18s ease !important; opacity: 0 !important; transform: translateX(-10px) scale(0.98) !important; }
+    .ap-panel-inner { background: var(--card-bg); border: 1px solid rgba(0,229,255,0.3); border-radius: 14px; overflow: hidden; box-shadow: 0 8px 40px rgba(0,194,255,0.12); }
+    .ap-panel-close { position: absolute; top: 1rem; right: 1rem; width: 32px; height: 32px; border-radius: 8px; background: rgba(0,194,255,0.08); border: 1px solid rgba(0,194,255,0.25); color: var(--text-dim); font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; z-index: 5; }
+    .ap-panel-close:hover { background: rgba(0,194,255,0.2); color: var(--accent); }
+    .ap-panel-header { background: linear-gradient(135deg, rgba(13,110,253,0.18), rgba(0,194,255,0.07)); padding: 1.3rem 1.5rem 1.1rem; border-bottom: 1px solid var(--glass-border); display: flex; align-items: center; gap: 1rem; position: relative; }
+    .ap-panel-icon { font-size: 1.8rem; width: 52px; height: 52px; flex-shrink: 0; background: rgba(0,194,255,0.08); border: 1px solid var(--glass-border); border-radius: 12px; display: flex; align-items: center; justify-content: center; }
+    .ap-panel-title { font-family: 'Orbitron', monospace; font-size: 0.95rem; color: var(--accent); margin-bottom: 0.2rem; }
+    .ap-panel-meta { font-family: 'Share Tech Mono', monospace; font-size: 0.65rem; color: var(--text-dim); }
+    .ap-panel-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.35rem; }
+    .ap-panel-body { padding: 1.3rem 1.5rem; max-height: calc(100vh - var(--nav-height) - 240px); overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(0,194,255,0.3) transparent; }
+    .ap-panel-body::-webkit-scrollbar { width: 4px; }
+    .ap-panel-body::-webkit-scrollbar-thumb { background: rgba(0,194,255,0.3); border-radius: 2px; }
+    .objectif-box { background: rgba(0,229,255,0.05); border: 1px solid rgba(0,229,255,0.22); border-left: 3px solid var(--accent); border-radius: 10px; padding: 0.9rem 1.1rem; margin-bottom: 1.3rem; }
+    .objectif-label { font-family: 'Orbitron', monospace; font-size: 0.7rem; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 0.4rem; }
+    .objectif-text { color: var(--text-main); font-size: 0.82rem; line-height: 1.7; margin: 0; }
+    .ps { margin-bottom: 1.3rem; }
+    .ps:last-child { margin-bottom: 0; }
+    .ps-title { font-family: 'Orbitron', monospace; font-size: 0.72rem; color: var(--blue-bright); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 0.6rem; padding-bottom: 0.3rem; border-bottom: 1px solid rgba(0,194,255,0.12); display: flex; align-items: center; gap: 0.5rem; }
+    .ps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+    .ps-block { background: rgba(0,194,255,0.04); border: 1px solid rgba(0,194,255,0.14); border-radius: 10px; padding: 0.85rem; }
+    .ps-block-title { font-family: 'Orbitron', monospace; font-size: 0.65rem; color: var(--accent); margin-bottom: 0.45rem; }
+    .si { display: flex; align-items: flex-start; gap: 0.45rem; padding: 0.25rem 0; font-size: 0.77rem; color: var(--text-main); border-bottom: 1px solid rgba(0,194,255,0.06); }
+    .si:last-child { border: none; }
+    .sd { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 0.34rem; }
+    .lv-grid { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .lv { padding: 0.28rem 0.65rem; background: rgba(0,229,255,0.05); border: 1px solid rgba(0,229,255,0.2); border-radius: 6px; font-size: 0.75rem; color: var(--text-main); }
+    .schema-box { background: rgba(0,0,0,0.35); border: 1px solid rgba(0,194,255,0.2); border-radius: 10px; overflow: hidden; margin-top: 0.5rem; }
+    .schema-box img { width: 100%; display: block; }
+    .schema-caption { color: var(--text-dim); font-size: 0.68rem; font-family: 'Share Tech Mono', monospace; margin-top: 0.35rem; text-align: center; }
+    .cat-label { font-family: 'Orbitron', monospace; font-size: 1rem; color: var(--text-dim); margin: 0 0 1.2rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--glass-border); display: flex; align-items: center; gap: 0.6rem; }
+    @media(max-width:800px) { .ap-grid { flex-direction: column; } .ap-sidebar-col { width: 100% !important; position: static; } .ap-card-outer { width: calc(50% - 0.6rem) !important; } .ap-panel-wrap { transform: none !important; } .ap-panel-body { max-height: none; } }
+    @media(max-width:600px) { .ps-grid { grid-template-columns: 1fr; } }
+    .loca-card { border:1px solid rgba(0,194,255,0.18); border-radius:10px; overflow:hidden; cursor:pointer; transition:all 0.25s ease; background:rgba(0,194,255,0.03); }
+    .loca-card:hover { border-color:rgba(0,229,255,0.55); transform:translateY(-3px); box-shadow:0 8px 24px rgba(0,194,255,0.18); }
+    .loca-img-wrap { overflow:hidden; aspect-ratio:16/9; background:#0a0f1a; }
+    .loca-img-wrap img { width:100%; height:100%; object-fit:cover; object-position:top; display:block; transition:transform 0.35s ease; }
+    .loca-card:hover .loca-img-wrap img { transform:scale(1.04); }
+    .loca-label { display:flex; align-items:center; gap:0.4rem; padding:0.4rem 0.6rem; font-size:0.7rem; color:var(--text-dim); font-family:'Share Tech Mono',monospace; border-top:1px solid rgba(0,194,255,0.1); }
+    .loca-num { color:var(--accent); font-size:0.65rem; opacity:0.7; flex-shrink:0; }
+    #loca-lightbox { display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.88); backdrop-filter:blur(6px); align-items:center; justify-content:center; flex-direction:column; gap:0.8rem; opacity:0; transition:opacity 0.28s ease; }
+    #loca-lightbox.is-open { opacity:1; }
+    #loca-lightbox img { max-width:90vw; max-height:80vh; border-radius:10px; box-shadow:0 0 60px rgba(0,194,255,0.25); }
+    @keyframes lbImgIn { from { opacity:0; transform:scale(0.86); } to { opacity:1; transform:scale(1); } }
+    #loca-lightbox-img.lb-entering { animation:lbImgIn 0.38s cubic-bezier(0.34,1.56,0.64,1) both; }
+    #loca-lightbox-label { color:var(--text-dim); font-family:'Share Tech Mono',monospace; font-size:0.8rem; }
+    #loca-lightbox-close { position:fixed; top:1.2rem; right:1.5rem; font-size:1.8rem; color:var(--text-dim); cursor:pointer; transition:color 0.2s; line-height:1; }
+    #loca-lightbox-close:hover { color:var(--accent); }
+    #loca-prev, #loca-next { position:fixed; top:50%; transform:translateY(-50%); background:rgba(0,0,0,0.45); border:1px solid rgba(0,194,255,0.35); border-radius:50%; width:46px; height:46px; color:#fff; font-size:2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:background 0.2s, border-color 0.2s, transform 0.2s; z-index:10000; line-height:1; padding:0; }
+    #loca-prev { left:1.2rem; }
+    #loca-next { right:1.2rem; }
+    #loca-prev:hover { background:rgba(0,194,255,0.22); border-color:rgba(0,229,255,0.7); transform:translateY(-50%) translateX(-2px); }
+    #loca-next:hover { background:rgba(0,194,255,0.22); border-color:rgba(0,229,255,0.7); transform:translateY(-50%) translateX(2px); }
   </style>
 </head>
 <body>
+<div id="loca-lightbox" style="display:none" onclick="if(event.target===this)closeLocaImg()">
+  <span id="loca-lightbox-close" onclick="closeLocaImg()">✕</span>
+  <button id="loca-prev" onclick="event.stopPropagation();locaNav(-1)">&#8249;</button>
+  <img id="loca-lightbox-img" src="" alt="">
+  <button id="loca-next" onclick="event.stopPropagation();locaNav(1)">&#8250;</button>
+  <div id="loca-lightbox-label"></div>
+</div>
+<script>
+const locaImgs = [
+  { src: 'https://i.imgur.com/Z3WIJfX.png', label: 'Accueil – Carousel produits' },
+  { src: 'https://i.imgur.com/cOALAgO.png', label: 'Notre histoire' },
+  { src: 'https://i.imgur.com/918S6vL.png', label: 'Catalogue produits' },
+  { src: 'https://i.imgur.com/MB9XqB5.png', label: 'Fiche produit & réservation' },
+  { src: 'https://i.imgur.com/3ApYO6p.png', label: 'Panier de location' },
+  { src: 'https://i.imgur.com/3nrFu9G.png', label: 'Formulaire inscription' },
+];
+let locaIdx = 0;
+function openLocaImg(idx) {
+  locaIdx = idx;
+  const img = document.getElementById('loca-lightbox-img');
+  const lb  = document.getElementById('loca-lightbox');
+  img.style.transition = 'none';
+  img.style.opacity = '';
+  img.style.transform = '';
+  img.classList.remove('lb-entering');
+  img.src = locaImgs[idx].src;
+  document.getElementById('loca-lightbox-label').textContent = locaImgs[idx].label;
+  lb.style.display = 'flex';
+  lb.offsetHeight;
+  lb.classList.add('is-open');
+  img.offsetHeight;
+  img.classList.add('lb-entering');
+  setTimeout(() => img.classList.remove('lb-entering'), 420);
+}
+function locaNav(dir) {
+  const img = document.getElementById('loca-lightbox-img');
+  const lbl = document.getElementById('loca-lightbox-label');
+  img.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+  img.style.opacity = '0';
+  img.style.transform = dir > 0 ? 'translateX(-36px)' : 'translateX(36px)';
+  setTimeout(() => {
+    locaIdx = (locaIdx + dir + locaImgs.length) % locaImgs.length;
+    img.src = locaImgs[locaIdx].src;
+    lbl.textContent = locaImgs[locaIdx].label;
+    img.style.transition = 'none';
+    img.style.transform = dir > 0 ? 'translateX(36px)' : 'translateX(-36px)';
+    img.offsetHeight;
+    img.style.transition = 'opacity 0.24s ease, transform 0.24s ease';
+    img.style.opacity = '1';
+    img.style.transform = 'translateX(0)';
+  }, 200);
+}
+function closeLocaImg() {
+  const lb = document.getElementById('loca-lightbox');
+  if (!lb.classList.contains('is-open')) return;
+  lb.classList.remove('is-open');
+  setTimeout(() => { lb.style.display = 'none'; }, 300);
+}
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('loca-lightbox').classList.contains('is-open')) return;
+  if (e.key === 'Escape') closeLocaImg();
+  if (e.key === 'ArrowLeft') locaNav(-1);
+  if (e.key === 'ArrowRight') locaNav(1);
+});
+</script>
 <script src="nav.js"></script>
+<script src="atelier_assets.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const imgs = {
+      'schema-fa-img':      () => typeof SCHEMA_FA      !== 'undefined' ? SCHEMA_FA      : null,
+      'schema-fruit-img':   () => typeof SCHEMA_FRUIT   !== 'undefined' ? SCHEMA_FRUIT   : null,
+      'screen-portail-img': () => typeof SCREEN_PORTAIL !== 'undefined' ? SCREEN_PORTAIL : null,
+    };
+
+    const root      = document.getElementById('ap-root');
+    const panelWrap = document.getElementById('ap-panel-wrap');
+    const cards     = document.querySelectorAll('.ap-card-closed');
+    const panels    = { fa: document.getElementById('tpl-fa'), fruit: document.getElementById('tpl-fruit'), loca: document.getElementById('tpl-loca'), portail: document.getElementById('tpl-portail') };
+    let openId = null;
+
+    function injectImgs() {
+      Object.entries(imgs).forEach(([id, fn]) => {
+        const el = document.getElementById(id); const src = fn();
+        if (el && src) el.src = src;
+      });
+    }
+
+    function openProject(id) {
+      root.classList.remove('is-closing');
+      if (openId === id) return;
+      if (openId !== null) {
+        panelWrap.classList.add('switching');
+        setTimeout(() => {
+          renderPanel(id);
+          requestAnimationFrame(() => requestAnimationFrame(() => panelWrap.classList.remove('switching')));
+        }, 200);
+      } else {
+        root.classList.add('has-open');
+        renderPanel(id);
+      }
+      cards.forEach(c => c.classList.toggle('is-active', c.dataset.id === id));
+      openId = id;
+    }
+
+    function renderPanel(id) {
+      const tpl = panels[id]; if (!tpl) return;
+      panelWrap.innerHTML = '';
+      panelWrap.appendChild(tpl.content.cloneNode(true));
+      injectImgs();
+      const closeBtn = panelWrap.querySelector('.ap-panel-close');
+      if (closeBtn) closeBtn.addEventListener('click', closeProject);
+    }
+
+    function closeProject() {
+      root.classList.add('is-closing');
+      root.classList.remove('has-open');
+      setTimeout(() => {
+        root.classList.remove('is-closing');
+        cards.forEach(c => c.classList.remove('is-active'));
+      }, 550);
+      setTimeout(() => {
+        panelWrap.innerHTML = '';
+        openId = null;
+      }, 750);
+    }
+
+    cards.forEach(card => card.addEventListener('click', () => openProject(card.dataset.id)));
+  });
+</script>
 <main>
   <div class="page-header">
     <h1>Ateliers Professionnels</h1>
     <div class="divider"></div>
-    <p class="subtitle">Travaux pratiques réalisés en formation BTS SIO SISR</p>
+    <p class="subtitle">Projets et travaux pratiques réalisés en BTS SIO SISR</p>
   </div>
-  <div class="container">
+  <div class="container" style="max-width:1400px; padding: 0 1.5rem 4rem;">
+    <div class="cat-label">🏛️ Projets professionnels</div>
+    <div class="ap-root" id="ap-root">
+      <div class="ap-grid" id="ap-grid">
+        <div id="ap-sidebar-col" class="ap-sidebar-col">
 
-    <div class="info-banner">
-      <span style="font-size:1.3rem;">ℹ️</span>
-      <span>Cette section regroupe l'ensemble des ateliers professionnels réalisés en cours de BTS SIO SISR. 
-      Les contenus seront ajoutés au fil de l'avancement de la formation.</span>
+        <div class="ap-card-outer">
+          <div class="ap-card-closed" data-id="fa">
+            <div class="acc-icon">🏛️</div>
+            <div><div class="acc-title">Musée Site de Fâ</div><div class="acc-meta">SISR · Équipe · Novembre 2024 · 17h</div></div>
+            <p class="acc-desc">Infrastructure réseau complète pour un musée sur 2 sites distants — DMZ, VoIP, NAS, AD, supervision.</p>
+            <div class="acc-tags"><span class="tag">pfSense</span><span class="tag">Active Directory</span><span class="tag">VoIP</span><span class="tag">DMZ</span><span class="tag">TrueNAS</span></div>
+            <div class="acc-open-hint">▶ Cliquer pour ouvrir</div>
+          </div>
+        </div>
+
+        <div class="ap-card-outer">
+          <div class="ap-card-closed" data-id="fruit">
+            <div class="acc-icon">🍎</div>
+            <div><div class="acc-title">Fruit Frais</div><div class="acc-meta">SISR · Individuel · Octobre 2025 · 8h</div></div>
+            <p class="acc-desc">Infrastructure sécurisée avec double pare-feu, DMZ publique, DNS BIND et proxy SquidGuard.</p>
+            <div class="acc-tags"><span class="tag">pfSense</span><span class="tag">DMZ</span><span class="tag">DNS BIND</span><span class="tag">SquidGuard</span></div>
+            <div class="acc-open-hint">▶ Cliquer pour ouvrir</div>
+          </div>
+        </div>
+
+        <div class="ap-card-outer">
+          <div class="ap-card-closed" data-id="loca">
+            <div class="acc-icon">🖥️</div>
+            <div><div class="acc-title">LocaBoard</div><div class="acc-meta">SLAM · Équipe · 2024–2025</div></div>
+            <p class="acc-desc">Site web de location de produits conçu de A à Z en méthode Agile — front, back, BDD, documentation.</p>
+            <div class="acc-tags"><span class="tag">PHP</span><span class="tag">SQL</span><span class="tag">Agile</span><span class="tag">MVC</span></div>
+            <div class="acc-open-hint">▶ Cliquer pour ouvrir</div>
+          </div>
+        </div>
+
+        <div class="ap-card-outer">
+          <div class="ap-card-closed" data-id="portail">
+            <div class="acc-icon">🔐</div>
+            <div><div class="acc-title">Portail Captif pfSense</div><div class="acc-meta">SISR · Individuel · BTS 2e année</div></div>
+            <p class="acc-desc">Réseau invité filaire isolé avec authentification obligatoire, DHCP, NAT et règles firewall avancées.</p>
+            <div class="acc-tags"><span class="tag">pfSense</span><span class="tag">Portail Captif</span><span class="tag">DHCP</span><span class="tag">NAT</span></div>
+            <div class="acc-open-hint">▶ Cliquer pour ouvrir</div>
+          </div>
+        </div>
+
+        </div>
+        <div id="ap-panel-wrap" class="ap-panel-wrap"></div>
+      </div>
     </div>
-
-    <div class="atelier-empty anim-in">
-      <div class="icon">🔧</div>
-      <h2>Section en construction</h2>
-      <p>
-        Les ateliers professionnels seront documentés ici progressivement. 
-        Chaque atelier présentera le contexte, les objectifs, les technologies utilisées 
-        et les compétences du référentiel BTS SIO mobilisées.
-      </p>
-    </div>
-
-    <!-- Exemples de placeholders d'ateliers à venir -->
-    <div class="grid-2" style="margin-top:2rem; gap:1.2rem;">
-      <div class="atelier-placeholder">
-        <h3>🌐 Atelier Réseau – VLAN & Routage</h3>
-        <p>Configuration de VLANs, routage inter-VLAN, pare-feu basique.</p>
-      </div>
-      <div class="atelier-placeholder">
-        <h3>🖥️ Atelier Systèmes – Debian Server</h3>
-        <p>Installation, configuration Apache/Nginx, MariaDB, SSH sécurisé.</p>
-      </div>
-      <div class="atelier-placeholder">
-        <h3>🔒 Atelier Sécurité – Durcissement</h3>
-        <p>Audit de sécurité, application des recommandations ANSSI.</p>
-      </div>
-      <div class="atelier-placeholder">
-        <h3>📦 Atelier GLPI – Gestion de parc</h3>
-        <p>Déploiement GLPI, inventaire, tickets, fusionInventory.</p>
-      </div>
-    </div>
-
   </div>
 </main>
+
+<!-- ══ TEMPLATE 1 : MUSÉE SITE DE FÂ ══ -->
+<template id="tpl-fa">
+  <div class="ap-panel-inner">
+    <div class="ap-panel-header">
+      <div class="ap-panel-icon">🏛️</div>
+      <div>
+        <div class="ap-panel-title">Projet SISR – Musée Site de Fâ</div>
+        <div class="ap-panel-meta">📅 Novembre 2024 · 17h | 👥 Équipe 2–3 étudiants | 🎓 Saint John Perse, Pau</div>
+        <div class="ap-panel-tags"><span class="tag">pfSense</span><span class="tag">Active Directory</span><span class="tag">VoIP</span><span class="tag">DMZ</span><span class="tag">TrueNAS</span><span class="tag">PHP/MySQL</span></div>
+      </div>
+      <button class="ap-panel-close">✕</button>
+    </div>
+    <div class="ap-panel-body">
+
+      <div class="objectif-box">
+        <div class="objectif-label">🎯 Objectif</div>
+        <p class="objectif-text">Concevoir et déployer une infrastructure réseau complète pour un vrai client sur deux sites distants. L'enjeu est de répondre à un cahier des charges professionnel complet : services réseau (pare-feu, messagerie, VoIP, billetterie web en DMZ, NAS, supervision) en garantissant sécurité, disponibilité à 99% et traçabilité des données. Ce projet simule une vraie mission d'intégration en ESN.</p>
+      </div>
+
+      <div class="ps">
+        <div class="ps-title">🗺️ Contexte</div>
+        <ul class="styled-list">
+          <li>Client : Musée Gallo-Romain de Fâ — musée, spectacles, escapes game, ateliers</li>
+          <li>2 sites distants de 21 km : <strong style="color:var(--accent)">ROYAN</strong> (siège) et <strong style="color:var(--accent)">FÂ</strong> (musée-parc)</li>
+          <li>Chaque site avec sa propre BOX — IP WAN (172.31.0.0/21)</li>
+          <li>Objectif : disponibilité, intégrité, confidentialité et ergonomie</li>
+        </ul>
+      </div>
+
+      <div class="ps">
+        <div class="ps-title">🔧 Services déployés</div>
+        <div class="ps-grid">
+          <div class="ps-block">
+            <div class="ps-block-title">🏢 ROYAN (Siège)</div>
+            <div class="si"><div class="sd"></div><span><strong>Active Directory</strong> + script PowerShell création utilisateurs</span></div>
+            <div class="si"><div class="sd"></div><span><strong>Messagerie + Chat</strong> interne</span></div>
+            <div class="si"><div class="sd"></div><span><strong>Téléphonie IP</strong> VoIP + sauvegarde nocturne</span></div>
+            <div class="si"><div class="sd"></div><span><strong>Billetterie web</strong> en DMZ – dispo 99%</span></div>
+            <div class="si"><div class="sd"></div><span><strong>Pare-feu pfSense</strong> + gestion DMZ</span></div>
+          </div>
+          <div class="ps-block">
+            <div class="ps-block-title">🏛️ FÂ (Parc)</div>
+            <div class="si"><div class="sd"></div><span><strong>Pare-feu</strong> WAN↔LAN filtré + supervision</span></div>
+            <div class="si"><div class="sd"></div><span><strong>Poste Debian IHM</strong> caisses &amp; billets</span></div>
+            <div class="si"><div class="sd"></div><span><strong>Intranet PHP/MySQL</strong> stocks restaurant</span></div>
+            <div class="si"><div class="sd"></div><span><strong>NAS TrueNAS</strong> + sauvegarde distante</span></div>
+            <div class="si"><div class="sd"></div><span><strong>Supervision</strong> NAS + Intranet + pare-feu</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ps">
+        <div class="ps-title">📦 Livrables</div>
+        <div class="lv-grid"><span class="lv">🗺️ Schéma réseau PDF</span><span class="lv">🖥️ Maquette VMs</span><span class="lv">📋 KANBAN</span><span class="lv">📄 Documentation</span></div>
+      </div>
+
+      <div class="ps">
+        <div class="ps-title">🗺️ Schéma réseau</div>
+        <div class="schema-box"><img id="schema-fa-img" src="" alt="Schéma réseau Musée Site de Fâ"></div>
+        <p class="schema-caption">FÂ (10.2.2.0/8) · DMZ Royan (192.168.3.0/24) · LAN Royan (192.168.2.0/24)</p>
+      </div>
+
+      <div class="ps">
+        <div class="ps-title">🔄 Démarche</div>
+        <ul class="styled-list">
+          <li>Analyse du cahier des charges client</li>
+          <li>Conception et validation du schéma réseau</li>
+          <li>Répartition des tâches sur KANBAN</li>
+          <li>Réalisation des maquettes en VMs + tests + recette</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</template>
+
+<!-- ══ TEMPLATE 2 : FRUIT FRAIS ══ -->
+<template id="tpl-fruit">
+  <div class="ap-panel-inner">
+    <div class="ap-panel-header">
+      <div class="ap-panel-icon">🍎</div>
+      <div>
+        <div class="ap-panel-title">Atelier SISR – Projet « Fruit Frais »</div>
+        <div class="ap-panel-meta">📅 Octobre 2025 · 8h | 👤 Individuel | 🎓 Saint John Perse, Pau</div>
+        <div class="ap-panel-tags"><span class="tag">pfSense</span><span class="tag">DMZ</span><span class="tag">DNS BIND</span><span class="tag">SquidGuard</span><span class="tag">NAT/PAT</span><span class="tag">Apache</span></div>
+      </div>
+      <button class="ap-panel-close">✕</button>
+    </div>
+    <div class="ap-panel-body">
+
+      <div class="objectif-box">
+        <div class="objectif-label">🎯 Objectif</div>
+        <p class="objectif-text">Mettre en place une architecture réseau sécurisée à 3 zones (WAN / DMZ / LAN) avec un double pare-feu pfSense. Le but est de sécuriser l'accès à un site web public depuis Internet tout en protégeant le réseau interne, et d'appliquer un filtrage web par proxy. Ce TP évalue la maîtrise du cloisonnement réseau et des règles de pare-feu en autonomie.</p>
+      </div>
+
+      <div class="ps">
+        <div class="ps-title">🗺️ Contexte</div>
+        <ul class="styled-list">
+          <li>Organisation fictive <strong style="color:var(--accent)">Pasteque</strong> — PME avec site web public et données internes sensibles</li>
+          <li>Architecture 3 zones : <strong>WAN</strong> 172.31.0.0/21 · <strong>DMZ</strong> 10.0.0.0/8 · <strong>LAN</strong> 192.168.11.0/24</li>
+          <li>Double pare-feu pfSense : externe (WAN↔DMZ) + interne (DMZ↔LAN) avec proxy filtrant</li>
+        </ul>
+      </div>
+
+      <div class="ps">
+        <div class="ps-title">🔧 Infrastructure déployée</div>
+        <div class="ps-grid">
+          <div class="ps-block">
+            <div class="ps-block-title">🌐 Zone DMZ</div>
+            <div class="si"><div class="sd"></div><span><strong>pfSense externe</strong> — WAN : 172.31.5.160 · DMZ : 10.11.11.1</span></div>
+            <div class="si"><div class="sd"></div><span><strong>Serveur Web public</strong> — 10.11.11.100 · Web + SSH + FTP</span></div>
+            <div class="si"><div class="sd"></div><span><strong>pfSense interne</strong> — DMZ : 10.11.11.200 · proxy SquidGuard</span></div>
+          </div>
+          <div class="ps-block">
+            <div class="ps-block-title">🔒 Zone LAN</div>
+            <div class="si"><div class="sd"></div><span><strong>Serveur Web + DNS BIND</strong> — 192.168.11.100 · 2 noms DNS internes</span></div>
+            <div class="si"><div class="sd"></div><span><strong>PC LAN (dev web)</strong> — Ubuntu · 192.168.11.254</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ps">
+        <div class="ps-title">🛡️ Règles de sécurité</div>
+        <div class="ps-grid">
+          <div class="ps-block">
+            <div class="ps-block-title">Pare-feu externe</div>
+            <div class="si"><div class="sd"></div><span>WAN → Serveur Web : HTTP uniquement</span></div>
+            <div class="si"><div class="sd"></div><span>WAN → LAN : bloqué</span></div>
+            <div class="si"><div class="sd"></div><span>Redirection port IP WAN → Web public</span></div>
+          </div>
+          <div class="ps-block">
+            <div class="ps-block-title">Pare-feu interne + Proxy</div>
+            <div class="si"><div class="sd"></div><span>PC dev → Web public : HTTP + SSH + FTP</span></div>
+            <div class="si"><div class="sd"></div><span>LAN → Internet : HTTP/HTTPS uniquement</span></div>
+            <div class="si"><div class="sd"></div><span>SquidGuard : blacklist www.reddit.com</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ps">
+        <div class="ps-title">🗺️ Schéma réseau</div>
+        <div class="schema-box"><img id="schema-fruit-img" src="" alt="Schéma réseau Projet Fruit Frais"></div>
+        <p class="schema-caption">Pasteque · 02/10/2025 · WAN 172.31.0.0/21 · DMZ 10.0.0.0/8 · LAN 192.168.11.0/24</p>
+      </div>
+
+    </div>
+  </div>
+</template>
+
+<!-- ══ TEMPLATE 3 : LOCABOARD ══ -->
+<template id="tpl-loca">
+  <div class="ap-panel-inner">
+    <div class="ap-panel-header">
+      <div class="ap-panel-icon">🖥️</div>
+      <div>
+        <div class="ap-panel-title">Atelier SLAM – Projet « LocaBoard »</div>
+        <div class="ap-panel-meta">📅 2024–2025 | 👥 Équipe | 🎓 Saint John Perse, Pau</div>
+        <div class="ap-panel-tags"><span class="tag">HTML/CSS</span><span class="tag">PHP</span><span class="tag">SQL</span><span class="tag">Méthode Agile</span><span class="tag">MVC</span></div>
+      </div>
+      <button class="ap-panel-close">✕</button>
+    </div>
+    <div class="ap-panel-body">
+
+      <div class="objectif-box">
+        <div class="objectif-label">🎯 Objectif</div>
+        <p class="objectif-text">Développer un site web complet de location de produits, de la conception jusqu'à la livraison, en simulant une vraie commande client. L'enjeu est autant technique (PHP, SQL, architecture MVC) qu'organisationnel : travailler en équipe avec la méthode Agile, se répartir les rôles, gérer un Kanban et livrer une documentation complète dans les délais.</p>
+      </div>
+
+      <div class="ps">
+        <div class="ps-title">🗺️ Contexte &amp; Mission</div>
+        <ul class="styled-list">
+          <li>Conception de A à Z d'un <strong style="color:var(--accent)">site web de location de produits</strong></li>
+          <li>Simulation d'une vraie commande client avec cahier des charges strict</li>
+          <li>Organisation en <strong style="color:var(--accent)">méthode Agile</strong> : sprints, répartition des tâches, revues</li>
+          <li>Livraison d'une documentation technique complète</li>
+        </ul>
+      </div>
+
+      <div class="ps">
+        <div class="ps-title">🔧 Fonctionnalités</div>
+        <div class="ps-grid">
+          <div class="ps-block">
+            <div class="ps-block-title">👤 Côté utilisateur</div>
+            <div class="si"><div class="sd"></div><span>Catalogue de produits à louer</span></div>
+            <div class="si"><div class="sd"></div><span>Système de réservation en ligne</span></div>
+            <div class="si"><div class="sd"></div><span>Création de compte &amp; authentification</span></div>
+            <div class="si"><div class="sd"></div><span>Suivi des locations en cours</span></div>
+          </div>
+          <div class="ps-block">
+            <div class="ps-block-title">⚙️ Côté administration</div>
+            <div class="si"><div class="sd"></div><span>Gestion du catalogue produits</span></div>
+            <div class="si"><div class="sd"></div><span>Suivi et validation des réservations</span></div>
+            <div class="si"><div class="sd"></div><span>Gestion des utilisateurs</span></div>
+            <div class="si"><div class="sd"></div><span>Interface d'administration dédiée</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ps" style="margin-bottom:0;">
+        <div class="ps-title">⚙️ Technologies</div>
+        <div style="display:flex;flex-wrap:wrap;gap:0.3rem;">
+          <span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">PHP</span><span class="tag">SQL / MySQL</span><span class="tag">Architecture MVC</span><span class="tag">Méthode Agile</span><span class="tag">Kanban</span>
+        </div>
+        <div class="ps" style="margin-bottom:0;margin-top:1.2rem;">
+          <div class="ps-title">📸 Aperçu du site</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.7rem;margin-top:0.7rem;">
+
+            <div class="loca-card" onclick="openLocaImg(0)">
+              <div class="loca-img-wrap"><img class="no-zoom" src="https://i.imgur.com/Z3WIJfX.png" alt="Accueil"></div>
+              <div class="loca-label"><span class="loca-num">01</span>Accueil – Carousel produits</div>
+            </div>
+
+            <div class="loca-card" onclick="openLocaImg(1)">
+              <div class="loca-img-wrap"><img class="no-zoom" src="https://i.imgur.com/cOALAgO.png" alt="Notre histoire"></div>
+              <div class="loca-label"><span class="loca-num">02</span>Notre histoire</div>
+            </div>
+
+            <div class="loca-card" onclick="openLocaImg(2)">
+              <div class="loca-img-wrap"><img class="no-zoom" src="https://i.imgur.com/918S6vL.png" alt="Catalogue"></div>
+              <div class="loca-label"><span class="loca-num">03</span>Catalogue produits</div>
+            </div>
+
+            <div class="loca-card" onclick="openLocaImg(3)">
+              <div class="loca-img-wrap"><img class="no-zoom" src="https://i.imgur.com/MB9XqB5.png" alt="Fiche produit"></div>
+              <div class="loca-label"><span class="loca-num">04</span>Fiche produit &amp; réservation</div>
+            </div>
+
+            <div class="loca-card" onclick="openLocaImg(4)">
+              <div class="loca-img-wrap"><img class="no-zoom" src="https://i.imgur.com/3ApYO6p.png" alt="Panier"></div>
+              <div class="loca-label"><span class="loca-num">05</span>Panier de location</div>
+            </div>
+
+            <div class="loca-card" onclick="openLocaImg(5)">
+              <div class="loca-img-wrap"><img class="no-zoom" src="https://i.imgur.com/3nrFu9G.png" alt="Inscription"></div>
+              <div class="loca-label"><span class="loca-num">06</span>Formulaire inscription</div>
+            </div>
+
+          </div>
+          <p style="font-size:0.68rem;color:var(--text-dim);font-family:'Share Tech Mono',monospace;margin-top:0.5rem;text-align:center;opacity:0.6;">↗ Cliquer sur une capture pour l'agrandir</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</template>
+
+<!-- ══ TEMPLATE 4 : PORTAIL CAPTIF ══ -->
+<template id="tpl-portail">
+  <div class="ap-panel-inner">
+    <div class="ap-panel-header">
+      <div class="ap-panel-icon">🔐</div>
+      <div>
+        <div class="ap-panel-title">TP SISR – Portail Captif pfSense</div>
+        <div class="ap-panel-meta">📅 BTS SIO 2e année · 6h | 👤 Individuel | 🎓 Préparation E6</div>
+        <div class="ap-panel-tags"><span class="tag">pfSense</span><span class="tag">Portail Captif</span><span class="tag">DHCP</span><span class="tag">NAT</span><span class="tag">Firewall</span></div>
+      </div>
+      <button class="ap-panel-close">✕</button>
+    </div>
+    <div class="ap-panel-body">
+
+      <div class="objectif-box">
+        <div class="objectif-label">🎯 Objectif</div>
+        <p class="objectif-text">Créer un réseau invité filaire sécurisé et isolé du réseau d'entreprise, avec une authentification obligatoire avant tout accès Internet. Le but est de résoudre un problème concret de sécurité (accès réseau non contrôlé) en segmentant le réseau avec pfSense, en configurant un portail captif et en appliquant des règles de pare-feu strictes. Compétence clé : cloisonnement réseau et traçabilité.</p>
+      </div>
+
+      <div class="ps">
+        <div class="ps-title">🏢 Contexte professionnel</div>
+        <ul class="styled-list">
+          <li>Entreprise fictive <strong style="color:var(--accent)">WebInnov</strong> — salle de formation avec prises Ethernet accessibles à des intervenants externes</li>
+          <li>Problème : tout équipement branché obtenait un accès réseau sans authentification</li>
+          <li>Solution : <strong style="color:var(--accent)">réseau invité filaire isolé</strong> avec authentification obligatoire</li>
+        </ul>
+      </div>
+
+      <div class="ps">
+        <div class="ps-title">🔧 Architecture réseau</div>
+        <div class="ps-grid">
+          <div class="ps-block">
+            <div class="ps-block-title">🌐 Interfaces pfSense</div>
+            <div class="si"><div class="sd"></div><span><strong>WAN</strong> — 192.168.1.0/24 · accès Internet</span></div>
+            <div class="si"><div class="sd"></div><span><strong>LAN</strong> — 192.168.2.0/24 · réseau interne</span></div>
+            <div class="si"><div class="sd"></div><span><strong>GUEST</strong> — 192.168.50.0/24 · portail captif</span></div>
+          </div>
+          <div class="ps-block">
+            <div class="ps-block-title">⚙️ Services</div>
+            <div class="si"><div class="sd"></div><span><strong>DHCP</strong> — plage 192.168.50.100–200</span></div>
+            <div class="si"><div class="sd"></div><span><strong>DNS</strong> — via pfSense (192.168.50.1)</span></div>
+            <div class="si"><div class="sd"></div><span><strong>NAT</strong> — translation vers Internet</span></div>
+            <div class="si"><div class="sd"></div><span><strong>Portail captif</strong> — redirection + auth</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ps">
+        <div class="ps-title">🛡️ Règles de sécurité</div>
+        <ul class="styled-list">
+          <li>GUEST → LAN : <strong style="color:#f87171">bloqué</strong> (isolation totale)</li>
+          <li>GUEST → interface pfSense : <strong style="color:#f87171">bloqué</strong></li>
+          <li>GUEST → Internet : <strong style="color:#4ade80">autorisé après authentification</strong></li>
+        </ul>
+      </div>
+
+      <div class="ps">
+        <div class="ps-title">🖥️ Aperçu — Portail captif</div>
+        <div class="schema-box"><img id="screen-portail-img" src="" alt="Portail captif pfSense"></div>
+        <p class="schema-caption">Page de connexion pfSense — authentification obligatoire avant navigation</p>
+      </div>
+
+      <div class="ps" style="margin-bottom:0;">
+        <div class="ps-title">✅ Compétences acquises</div>
+        <ul class="styled-list">
+          <li>Segmentation réseau (WAN / LAN / GUEST) avec 3 interfaces</li>
+          <li>Configuration DHCP, DNS, NAT et règles firewall avancées</li>
+          <li>Isolation réseau, traçabilité et authentification obligatoire</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</template>
+
 </body>
 </html>
