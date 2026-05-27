@@ -13,7 +13,6 @@ Portfolio-TUCOO v2/
 ├── stages.html        → Stages (OGFA, Safran, Orange, UPPA…)
 ├── veille.html        → Veille technologique (caméras IP)
 ├── competences.html   → Blocs de compétences BTS SIO (1, 2, 3)
-├── productions.html   → Réalisations techniques
 ├── style.css          → Styles communs (thème cyberpunk bleu)
 ├── index.css          → Styles spécifiques à l'accueil
 ├── nav.js             → Navigation injectée automatiquement sur toutes les pages
